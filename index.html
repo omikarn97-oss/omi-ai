@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omi AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 18px;
+            text-align: center;
+            border-bottom: 1px solid #29304a;
+            background: #11182b;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header p {
+            margin-top: 5px;
+            color: #9ca8c7;
+            font-size: 13px;
+        }
+
+        #chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .user {
+            margin-left: auto;
+            background: #2563eb;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai {
+            margin-right: auto;
+            background: #1b2438;
+            border: 1px solid #303b58;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            background: #11182b;
+            border-top: 1px solid #29304a;
+        }
+
+        #message {
+            flex: 1;
+            min-width: 0;
+            padding: 13px 15px;
+            border-radius: 14px;
+            border: 1px solid #43506f;
+            outline: none;
+            background: #0b1020;
+            color: white;
+            font-size: 16px;
+        }
+
+        #message:focus {
+            border-color: #4f8cff;
+        }
+
+        #send {
+            padding: 0 20px;
+            border-radius: 14px;
+            border: 2px solid #4f8cff;
+            background: transparent;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #send:active {
+            transform: scale(0.92);
+        }
+
+        #send:disabled {
+            opacity: 0.5;
+        }
+
+        @media (max-width: 500px) {
+            .header {
+                padding: 15px;
+            }
+
+            #chat {
+                padding: 12px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            #send {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+        <h1>🤖 Omi AI</h1>
+        <p>Your AI Assistant</p>
+    </div>
+
+    <div id="chat">
+        <div class="message ai">
+            Hello! I'm Omi AI. How can I help you today?
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input
+            id="message"
+            type="text"
+            placeholder="Type your message..."
+            autocomplete="off"
+        >
+
+        <button id="send" type="button">
+            Send
+        </button>
+    </div>
+
+</div>
+
+<script>
+    const chat = document.getElementById("chat");
+    const messageInput = document.getElementById("message");
+    const sendButton = document.getElementById("send");
+
+    function addMessage(text, type) {
+        const message = document.createElement("div");
+
+        message.className = "message " + type;
+        message.textContent = text;
+
+        chat.appendChild(message);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+
+        if (!message) {
+            return;
+        }
+
+        addMessage(message, "user");
+
+        messageInput.value = "";
+        sendButton.disabled = true;
+        sendButton.textContent = "…";
+
+        try {
+            const response = await fetch("/ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: message
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.reply) {
+                addMessage(data.reply, "ai");
+            } else {
+                addMessage("Sorry, I couldn't get a response.", "ai");
+            }
+
+        } catch (error) {
+            console.error(error);
+            addMessage(
+                "Connection error. Please make sure the Omi AI server is running.",
+                "ai"
+            );
+        }
+
+        sendButton.disabled = false;
+        sendButton.textContent = "Send";
+        messageInput.focus();
+    }
+
+    sendButton.addEventListener("click", sendMessage);
+
+    messageInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    });
+</script>
+
+</body>
+</html>
