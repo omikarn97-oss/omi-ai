@@ -16,7 +16,7 @@ const genAI = new GoogleGenerativeAI(
 );
 
 const model = genAI.getGenerativeModel({
-    model: "gemini-3.5-flash-lite",
+    model: "gemini-3.6-flash",
     systemInstruction: `
 You are OMI AI.
 
@@ -30,7 +30,7 @@ If someone asks for an introduction about your owner, answer:
 Name: Omi Karn
 Country/Nationality: Nepal
 Province: Madhesh Province
-Home/Address: Barhathwa
+Home/Address: Barahathwa
 `
 });
 
@@ -41,16 +41,32 @@ app.get("/", (req, res) => {
 app.post("/ask", async (req, res) => {
     try {
         const message = req.body.message;
-
-        if (!message) {
+const image = req.body.image;
+const mimeType = req.body.mimeType;
+        if (!message && !image) {
             return res.status(400).json({
                 error: "Message is required"
             });
         }
 
-        const result = await model.generateContent(message);
-        const reply = result.response.text();
+        const parts = [];
 
+if (message) {
+    parts.push({ text: message });
+}
+
+if (image) {
+    parts.push({
+        inlineData: {
+            data: image,
+            mimeType: mimeType
+        }
+    });
+}
+
+const result = await model.generateContent(parts);
+const response = await result.response;
+const reply = response.text();
         res.json({
             reply: reply
         });
