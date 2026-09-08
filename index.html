@@ -169,6 +169,24 @@ button{
   text-align:left;
   font-size:15px;
 }
+
+.premium-btn{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border:1px solid #d6a500;
+  border-radius:12px;
+  background:linear-gradient(135deg,#fff4b0,#ffd54a);
+  color:#4a3500;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 15px #d6a50033;
+}
+
+.premium-btn:active{
+  transform:scale(.98);
+}
 #closeMenu{
   position:absolute;
   top:15px;
@@ -538,6 +556,8 @@ button{
   <button class="side-btn" id="callBtn">📞 Voice Call Mode</button>
   <button class="side-btn" id="themeBtn">🌙 Dark / Light</button>
   <button class="side-btn" id="wallpaperBtn">🖼️ Change Wallpaper</button>
+
+  <button class="premium-btn" id="premiumBtn">👑 Upgrade to Omi AI Premium</button>
 
   <div class="recent-title">🕘 Recent Chats</div>
 
@@ -1102,5 +1122,241 @@ document.getElementById("callMic").onclick=()=>{
 
 showRecentChats();
 </script>
+
+<!-- OMI AI PREMIUM MODAL -->
+<div class="premium-modal" id="premiumModal">
+  <div class="premium-card">
+
+    <button class="premium-close" id="premiumClose">✕</button>
+
+    <div class="premium-icon">👑</div>
+
+    <h2>OMI AI Premium</h2>
+    <p class="premium-subtitle">
+      Unlock more powerful Omi AI features.
+    </p>
+
+    <div class="premium-plans">
+
+      <div class="plan-card free-plan">
+        <div class="plan-title">Free</div>
+        <div class="plan-price">₹0</div>
+        <div class="plan-period">Forever</div>
+
+        <div class="plan-feature">✓ Normal AI Chat</div>
+        <div class="plan-feature">✓ Image Understanding</div>
+        <div class="plan-feature">✓ Voice Input</div>
+      </div>
+
+      <div class="plan-card premium-plan">
+        <div class="plan-badge">POPULAR</div>
+        <div class="plan-title">Premium 👑</div>
+        <div class="plan-price">Coming Soon</div>
+        <div class="plan-period">Payment will be added later</div>
+
+        <div class="plan-feature">✓ More AI usage</div>
+        <div class="plan-feature">✓ Premium AI features</div>
+        <div class="plan-feature">✓ Priority features</div>
+        <div class="plan-feature">✓ Premium badge</div>
+
+        <button class="premium-upgrade" id="premiumUpgrade">
+          👑 Upgrade to Premium
+        </button>
+      </div>
+
+    </div>
+
+    <p class="premium-note">
+      Premium payment is not connected yet.
+    </p>
+
+  </div>
+</div>
+
+<style>
+.premium-modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:#0008;
+  backdrop-filter:blur(8px);
+}
+
+.premium-modal.show{
+  display:flex;
+  animation:premiumFade .2s ease;
+}
+
+.premium-card{
+  width:min(440px,100%);
+  max-height:90vh;
+  overflow:auto;
+  position:relative;
+  padding:28px 20px 22px;
+  border:1px solid #d6a500;
+  border-radius:24px;
+  background:var(--bg);
+  color:var(--text);
+  box-shadow:0 20px 60px #0005;
+  text-align:center;
+}
+
+.premium-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:38px;
+  height:38px;
+  border:1px solid var(--border);
+  border-radius:50%;
+  background:var(--bg);
+  color:var(--text);
+  font-size:18px;
+  cursor:pointer;
+}
+
+.premium-close:active{
+  transform:scale(.9);
+}
+
+.premium-icon{
+  font-size:48px;
+  margin-bottom:6px;
+}
+
+.premium-card h2{
+  margin:0;
+  font-size:26px;
+}
+
+.premium-subtitle{
+  margin:8px 0 20px;
+  opacity:.7;
+}
+
+.premium-plans{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  text-align:left;
+}
+
+.plan-card{
+  position:relative;
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:var(--bg);
+}
+
+.premium-plan{
+  border-color:#d6a500;
+  box-shadow:0 5px 20px #d6a50022;
+}
+
+.plan-title{
+  font-size:18px;
+  font-weight:800;
+}
+
+.plan-price{
+  margin-top:8px;
+  font-size:24px;
+  font-weight:800;
+}
+
+.plan-period{
+  font-size:12px;
+  opacity:.6;
+  margin:3px 0 14px;
+}
+
+.plan-feature{
+  margin:8px 0;
+  font-size:14px;
+}
+
+.plan-badge{
+  position:absolute;
+  top:12px;
+  right:12px;
+  padding:4px 8px;
+  border:1px solid #d6a500;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:800;
+}
+
+.premium-upgrade{
+  width:100%;
+  margin-top:15px;
+  padding:13px;
+  border:1px solid #d6a500;
+  border-radius:12px;
+  background:linear-gradient(135deg,#fff4b0,#ffd54a);
+  color:#4a3500;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.premium-upgrade:active{
+  transform:scale(.97);
+}
+
+.premium-note{
+  margin:16px 0 0;
+  font-size:12px;
+  opacity:.55;
+}
+
+@keyframes premiumFade{
+  from{
+    opacity:0;
+    transform:scale(.96);
+  }
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+@media(max-width:480px){
+  .premium-card{
+    padding:25px 15px 18px;
+    border-radius:20px;
+  }
+}
+</style>
+
+<script>
+const premiumBtn=document.getElementById("premiumBtn");
+const premiumModal=document.getElementById("premiumModal");
+const premiumClose=document.getElementById("premiumClose");
+const premiumUpgrade=document.getElementById("premiumUpgrade");
+
+premiumBtn.onclick=()=>{
+  premiumModal.classList.add("show");
+};
+
+premiumClose.onclick=()=>{
+  premiumModal.classList.remove("show");
+};
+
+premiumModal.onclick=(e)=>{
+  if(e.target===premiumModal){
+    premiumModal.classList.remove("show");
+  }
+};
+
+premiumUpgrade.onclick=()=>{
+  alert("Premium payment will be connected here.");
+};
+</script>
+
 </body>
 </html>
