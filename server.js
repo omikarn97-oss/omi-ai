@@ -75,7 +75,8 @@ const reply = response.text();
         console.error("AI Error:", error);
 
         res.status(500).json({
-            error: "AI response failed"
+            error: "AI response failed",
+            details: error.message || String(error)
         });
     }
 });
