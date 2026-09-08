@@ -1,427 +1,1106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omi AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omi AI - Season 6</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#dbe2ea;
+  --ai:#1f2937;
+  --user:#2563eb;
+}
+body.dark{
+  --bg:#080d18;
+  --panel:#111827;
+  --text:#f9fafb;
+  --muted:#9ca3af;
+  --border:#263244;
+  --ai:#182235;
+  --user:#2563eb;
+}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  transition:.25s;
+}
+.app{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  max-width:900px;
+  margin:auto;
+}
+.header{
+  padding:14px 60px 10px;
+  text-align:center;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+}
+.header h1{margin:0;font-size:23px}
+.header p{margin:4px 0 0;color:var(--muted);font-size:13px}
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: url("wallpaper.png") center/cover fixed no-repeat;
-            color: white;
-            min-height: 100vh;
-        }
-
-        .app {
-            width: 100%;
-            max-width: 800px;
-            height: 100vh;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            padding: 18px;
-            text-align: center;
-            border-bottom: 1px solid #29304a;
-            background: #11182b;
-        }
-
-        .header h1 {
-            font-size: 24px;
-        }
-
-        .header p {
-            margin-top: 5px;
-            color: #9ca8c7;
-            font-size: 13px;
-        }
-
-       .sidebar {
-    position: fixed;
-    top: 0;
-    left: -300px;
-    width: 280px;
-    height: 100vh;
-    padding: 18px;
-    background: #11182b;
-    border-right: 1px solid #29304a;
-    z-index: 1000;
-    transition: left 0.3s ease;
-    overflow-y: auto;
+#chat{
+  flex:1;
+  overflow-y:auto;
+  padding:18px;
+  scroll-behavior:smooth;
+}
+.message{
+  max-width:82%;
+  padding:13px 16px;
+  margin:10px 0;
+  border-radius:16px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
+.message.ai{
+  background:var(--ai);
+  color:white;
+  margin-right:auto;
+  border-bottom-left-radius:5px;
+}
+.message.user{
+  background:var(--user);
+  color:white;
+  margin-left:auto;
+  border-bottom-right-radius:5px;
+}
+.message-actions{
+  display:flex;
+  gap:6px;
+  margin-top:7px;
+}
+.message-actions button{
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  border-radius:8px;
+  padding:5px 8px;
+  font-size:12px;
 }
 
-.sidebar.open {
-    left: 0;
+.input-area{
+  padding:10px;
+  display:flex;
+  gap:7px;
+  background:var(--panel);
+  border-top:1px solid var(--border);
+}
+#message{
+  flex:1;
+  min-width:0;
+  border:2px solid var(--border);
+  border-radius:13px;
+  padding:11px;
+  background:var(--bg);
+  color:var(--text);
+  outline:none;
+}
+#message:focus{border-color:#2563eb}
+
+button{
+  cursor:pointer;
+}
+.tool-btn{
+  border:2px solid #2563eb;
+  background:var(--panel);
+  color:var(--text);
+  border-radius:12px;
+  padding:9px 11px;
+  font-size:18px;
+}
+.tool-btn:active{transform:scale(.96)}
+#send{
+  border:2px solid #2563eb;
+  background:#2563eb;
+  color:white;
+  border-radius:12px;
+  padding:9px 17px;
+  font-weight:bold;
 }
 
-#menuBtn {
-    position: fixed;
-    top: 14px;
-    left: 14px;
-    z-index: 1100;
-    padding: 8px 12px;
-    border: 2px solid #4f8cff;
-    border-radius: 10px;
-    background: #11182b;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
+#menuBtn{
+  position:fixed;
+  top:15px;
+  left:15px;
+  z-index:20;
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  border:2px solid #4f8cff;
+  background:#111827;
+  color:white;
+  font-size:26px;
+}
+.sidebar{
+  position:fixed;
+  left:-310px;
+  top:0;
+  bottom:0;
+  width:290px;
+  z-index:30;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  padding:70px 15px 15px;
+  transition:.25s;
+  box-shadow:8px 0 30px #0002;
+}
+.sidebar.open{left:0}
+.sidebar h2{margin:0 0 15px}
+.side-btn{
+  width:100%;
+  padding:13px;
+  margin:5px 0;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--bg);
+  color:var(--text);
+  text-align:left;
+  font-size:15px;
+}
+#closeMenu{
+  position:absolute;
+  top:15px;
+  right:15px;
+  border:0;
+  background:none;
+  color:var(--text);
+  font-size:25px;
+}
+.recent-title{
+  margin-top:20px;
+  color:var(--muted);
+  font-size:13px;
+}
+.recent-item{
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
 }
 
-#menuBtn:active,
-#closeMenu:active,
-#newChatMenu:active {
-    transform: scale(0.94);
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0006;
+  z-index:25;
+}
+.overlay.show{display:block}
+
+.call-panel{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:100;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(79,140,255,.18),transparent 32%),
+    var(--bg);
+  color:var(--text);
+  text-align:center;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  padding:24px 20px calc(24px + env(safe-area-inset-bottom));
 }
 
-#closeMenu,
-#newChatMenu {
-    border: 2px solid #4f8cff;
-    border-radius: 10px;
-    background: transparent;
-    color: white;
-    padding: 10px 12px;
-    cursor: pointer;
+.call-panel.show{
+  display:flex;
 }
 
-#newChatMenu {
-    width: 100%;
-    margin-top: 15px;
+.call-top{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:48px;
+  position:relative;
 }
 
-.sidebar h3 {
-    margin: 22px 0 12px;
+.call-close{
+  position:absolute;
+  left:0;
+  top:0;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  font-size:20px;
 }
 
-#recentChats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-} #chat {
-            flex: 1;
-            overflow-y: auto;
-            padding: 18px;
-        }
+.call-label{
+  font-size:12px;
+  font-weight:bold;
+  letter-spacing:3px;
+  opacity:.65;
+}
 
-        .message {
-            max-width: 85%;
-            padding: 12px 15px;
-            margin-bottom: 12px;
-            border-radius: 16px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
+.call-main{
+  flex:1;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:0;
+}
 
-        .user {
-            margin-left: auto;
-            background: #2563eb;
-            border-bottom-right-radius: 4px;
-        }
+.call-orb-wrap{
+  position:relative;
+  width:220px;
+  height:220px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:28px;
+}
 
-        .ai {
-            margin-right: auto;
-            background: #1b2438;
-            border: 1px solid #303b58;
-            border-bottom-left-radius: 4px;
-        }
+.call-orb{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 32% 25%,#ffffff 0 4%,#9cc2ff 9%,#4f8cff 30%,#6d28d9 62%,#111827 100%);
+  box-shadow:
+    0 0 0 10px rgba(79,140,255,.08),
+    0 0 45px rgba(79,140,255,.35),
+    inset -20px -20px 35px rgba(0,0,0,.25);
+  animation:omiOrbFloat 3.5s ease-in-out infinite;
+  transition:.3s ease;
+}
 
-            display: flex;
-            gap: 10px;
-            padding: 12px;
-            background: #11182b;
-            border-top: 1px solid #29304a;
-        }
+.call-orb::before{
+  content:"";
+  position:absolute;
+  inset:-14px;
+  border:2px solid rgba(79,140,255,.25);
+  border-radius:50%;
+  animation:omiRing 2.5s linear infinite;
+}
 
-        #message {
-            flex: 1;
-            min-width: 0;
-            padding: 13px 15px;
-            border-radius: 14px;
-            border: 1px solid #43506f;
-            outline: none;
-            background: #11182b;
-            color: white;
-            font-size: 16px;
-        }
+.call-orb::after{
+  content:"";
+  position:absolute;
+  width:35px;
+  height:35px;
+  top:22px;
+  left:35px;
+  border-radius:50%;
+  background:rgba(255,255,255,.45);
+  filter:blur(8px);
+}
 
-        #message:focus {
-            border-color: #4f8cff;
-        }
+.call-orb span{
+  position:relative;
+  z-index:2;
+  font-size:62px;
+  font-weight:900;
+  color:white;
+  text-shadow:0 4px 20px rgba(0,0,0,.35);
+}
 
-        #send {
-            padding: 0 20px;
-            border-radius: 14px;
-            border: 2px solid #4f8cff;
-            background: transparent;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+.call-panel.listening .call-orb{
+  animation:omiListening .8s ease-in-out infinite alternate;
+  box-shadow:
+    0 0 0 16px rgba(79,140,255,.09),
+    0 0 65px rgba(79,140,255,.6),
+    inset -20px -20px 35px rgba(0,0,0,.25);
+}
 
-        #send:active {
-            transform: scale(0.92);
-        }
+.call-panel.speaking .call-orb{
+  animation:omiSpeaking .55s ease-in-out infinite alternate;
+  box-shadow:
+    0 0 0 18px rgba(109,40,217,.10),
+    0 0 80px rgba(109,40,217,.65),
+    inset -20px -20px 35px rgba(0,0,0,.25);
+}
 
-        #send:disabled {
-            opacity: 0.5;
-        }
+.call-main h2{
+  margin:0;
+  font-size:27px;
+}
 
-        @media (max-width: 500px) {
-            .header {
-                padding: 15px;
-            }
+.call-status{
+  margin-top:9px;
+  color:var(--muted);
+  font-size:14px;
+  min-height:20px;
+}
 
-            #chat {
-                padding: 12px;
-            }
+.call-controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  width:100%;
+  padding-top:20px;
+}
 
-            .message {
-                max-width: 90%;
-            }
+.call-action,
+.call-end{
+  min-width:76px;
+  min-height:76px;
+  padding:10px;
+  border-radius:24px;
+  border:2px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-size:24px;
+  box-shadow:0 8px 25px rgba(0,0,0,.12);
+  transition:.2s ease;
+}
 
-            #send {
-                padding: 0 15px;
-            }
-        }
-    </style>
+.call-action span,
+.call-end span{
+  font-size:11px;
+  font-weight:bold;
+}
+
+.call-action:active,
+.call-end:active{
+  transform:scale(.92);
+}
+
+.call-mute.muted{
+  border-color:#dc2626;
+  background:#dc2626;
+  color:white;
+}
+
+.call-end{
+  border-color:#dc2626;
+  background:#dc2626;
+  color:white;
+}
+
+@keyframes omiOrbFloat{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-10px) scale(1.025)}
+}
+
+@keyframes omiRing{
+  0%{transform:scale(.92);opacity:.8}
+  100%{transform:scale(1.18);opacity:0}
+}
+
+@keyframes omiListening{
+  from{transform:scale(.98)}
+  to{transform:scale(1.08)}
+}
+
+@keyframes omiSpeaking{
+  from{transform:scale(.96)}
+  to{transform:scale(1.12)}
+}
+
+@media(max-width:600px){
+  .call-orb-wrap{
+    width:190px;
+    height:190px;
+  }
+
+  .call-orb{
+    width:155px;
+    height:155px;
+  }
+
+  .call-orb span{
+    font-size:52px;
+  }
+
+  .call-controls{
+    gap:9px;
+  }
+
+  .call-action,
+  .call-end{
+    min-width:70px;
+    min-height:70px;
+    border-radius:21px;
+  }
+}
+
+.preview{
+  padding:5px 10px;
+}
+.preview img,.preview video{
+  max-width:230px;
+  max-height:180px;
+  border-radius:12px;
+}
+
+@media(max-width:600px){
+  .header{padding-left:65px;padding-right:55px}
+  .message{max-width:88%}
+  .input-area{padding:7px}
+  .tool-btn{padding:8px}
+  #send{padding:8px 12px}
+}
+
+.chat-search{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:14px 0 12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  background:rgba(0,0,0,.25);
+  transition:.25s ease;
+}
+
+.chat-search:focus-within{
+  border-color:rgba(255,255,255,.35);
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(0,0,0,.18);
+}
+
+.chat-search span{
+  font-size:18px;
+  flex-shrink:0;
+}
+
+.chat-search input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:inherit;
+  font-size:15px;
+  min-width:0;
+}
+
+.chat-search input::placeholder{
+  opacity:.55;
+}
+
+#clearSearch{
+  border:1px solid rgba(255,255,255,.18);
+  background:transparent;
+  color:inherit;
+  border-radius:10px;
+  width:30px;
+  height:30px;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+#clearSearch:active{
+  transform:scale(.88);
+}
+
+#clearSearch:hover{
+  transform:scale(1.05);
+}
+
+.search-empty{
+  padding:18px 10px;
+  text-align:center;
+  opacity:.55;
+  font-size:14px;
+}
+
+</style>
 </head>
 
 <body>
-<div id="sidebar" class="sidebar">
-    <button id="closeMenu" type="button">✕</button>
+<div class="overlay" id="overlay"></div>
 
-    <button id="newChatMenu" type="button">＋ New Chat</button>
+<div class="sidebar" id="sidebar">
+  <button id="closeMenu">✕</button>
+  <h2>🤖 Omi AI</h2>
 
-    <h3>Recent Chats</h3>
+  <button class="side-btn" id="newChat">➕ New Chat</button>
+  <button class="side-btn" id="callBtn">📞 Voice Call Mode</button>
+  <button class="side-btn" id="themeBtn">🌙 Dark / Light</button>
+  <button class="side-btn" id="wallpaperBtn">🖼️ Change Wallpaper</button>
 
-    <div id="recentChats"></div>
+  <div class="recent-title">🕘 Recent Chats</div>
+
+  <div class="chat-search">
+    <span>🔍</span>
+    <input
+      id="recentSearch"
+      type="text"
+      placeholder="Search chats..."
+      autocomplete="off"
+    >
+    <button id="clearSearch" type="button">✕</button>
+  </div>
+
+  <div id="recentChats"></div>
 </div>
 
-<button id="menuBtn" type="button">☰</button>
+<button id="menuBtn">☰</button>
+
 <div class="app">
+  <div class="header">
+    <h1>🤖 Omi AI</h1>
+    <p>Your AI Assistant</p>
+  </div>
 
-    <div class="header">
-        <h1>🤖 Omi AI</h1>
-        <p>Your AI Assistant</p>
+  <div id="chat">
+    <div class="message ai">Hello! I'm Omi AI. How can I help you today?</div>
+  </div>
+
+  <div class="preview" id="preview"></div>
+
+  <div class="input-area">
+    <input id="imageInput" type="file" accept="image/*,video/*" hidden>
+
+    <button class="tool-btn" id="mediaBtn" title="Photo / Video">📷</button>
+    <button class="tool-btn" id="micBtn" title="Microphone">🎙️</button>
+
+    <input id="message" type="text" placeholder="Type your message..." autocomplete="off">
+
+    <button id="send">Send</button>
+  </div>
+</div>
+
+<div class="call-panel" id="callPanel">
+  <div class="call-top">
+    <button class="call-close" id="callClose" aria-label="Close">✕</button>
+    <div class="call-label">VOICE MODE</div>
+  </div>
+
+  <div class="call-main">
+    <div class="call-orb-wrap">
+      <div class="call-orb" id="callOrb">
+        <span>O</span>
+      </div>
     </div>
 
-    <div id="chat">
-        <div class="message ai">
-            Hello! I'm Omi AI. How can I help you today?
-        </div>
-    </div>
+    <h2>Omi AI</h2>
+    <div class="call-status" id="callStatus">Tap the microphone to speak</div>
+  </div>
 
-    <div class="input-area">
-<input
-    type="file"
-    id="imageInput"
-    accept="image/*,video/*"
-    hidden
->
+  <div class="call-controls">
+    <button class="call-action" id="callMic">
+      🎙️
+      <span>Speak</span>
+    </button>
 
-<button id="imageBtn" type="button">
-    📷 Photo / 🎥 Video
-</button>    
-    <input
-            id="message"
-            type="text"
-            placeholder="Type your message..."
-            autocomplete="off"
-        >
+    <button class="call-action call-mute" id="callMute">
+      🔇
+      <span>Mute</span>
+    </button>
 
-        <button id="send" type="button">
-            Send
-        </button>
-    </div>
-
+    <button class="call-end" id="endCall">
+      ✕
+      <span>End Call</span>
+    </button>
+  </div>
 </div>
 
 <script>
-    const chat = document.getElementById("chat");
-    const messageInput = document.getElementById("message");
-    const sendButton = document.getElementById("send");
-const recentChats = document.getElementById("recentChats");
+const API_URL="https://omi-ai-1.onrender.com/ask";
 
-    function addMessage(text, type) {
-        const message = document.createElement("div");
+const chat=document.getElementById("chat");
+const messageInput=document.getElementById("message");
+const sendButton=document.getElementById("send");
+const recentChats=document.getElementById("recentChats");
 
-        message.className = "message " + type;
-        message.textContent = text;
+const sidebar=document.getElementById("sidebar");
+const overlay=document.getElementById("overlay");
 
-        chat.appendChild(message);
-        chat.scrollTop = chat.scrollHeight;
-    }
+const mediaBtn=document.getElementById("mediaBtn");
+const imageInput=document.getElementById("imageInput");
+const preview=document.getElementById("preview");
 
-    async function sendMessage() {
-    const message = messageInput.value.trim();
-    saveRecentChat(message);
-        if (!message) {
-            return;
-        }
+let selectedImage=null;
+let selectedMimeType=null;
+let lastUserMessage="";
+let lastAIMessage="";
+let recognition=null;
+let speaking=false;
 
-        addMessage(message, "user");
+function scrollChat(){
+  chat.scrollTop=chat.scrollHeight;
+}
 
-        messageInput.value = "";
-        sendButton.disabled = true;
-        sendButton.textContent = "…";
+function addMessage(text,type,actions=false){
+  const box=document.createElement("div");
+  box.className="message "+type;
 
-        try {
-            const response = await fetch("https://omi-ai-1.onrender.com/ask", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: message,
-                    image: window.selectedImage || null,
-                    mimeType: window.selectedMimeType || null
-                })
-            });
+  const content=document.createElement("div");
+  content.textContent=text;
+  box.appendChild(content);
 
-            const data = await response.json();
+  if(type==="ai" && actions){
+    const actionsBox=document.createElement("div");
+    actionsBox.className="message-actions";
 
-            if (data.reply) {
-                addMessage(data.reply, "ai");
-            } else {
-                addMessage("Sorry, I couldn't get a response.", "ai");
-            }
+    const copy=document.createElement("button");
+    copy.textContent="📋 Copy";
+    copy.onclick=()=>navigator.clipboard?.writeText(text);
 
-        } catch (error) {
-            console.error(error);
-            addMessage(
-                "Connection error. Please make sure the Omi AI server is running.",
-                "ai"
-            );
-        }
+    const speak=document.createElement("button");
+    speak.textContent="🔊 Speak";
+    speak.onclick=()=>speakText(text);
 
-        sendButton.disabled = false;
-        sendButton.textContent = "Send";
-        messageInput.focus();
-    }
+    const regenerate=document.createElement("button");
+    regenerate.textContent="🔄 Regenerate";
+    regenerate.onclick=()=>sendToAI(lastUserMessage);
 
-       const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const closeMenu = document.getElementById("closeMenu");
-    const newChatMenu = document.getElementById("newChatMenu");
+    const share=document.createElement("button");
+    share.textContent="📤 Share";
+    share.onclick=async()=>{
+      if(navigator.share){
+        await navigator.share({text:text});
+      }else{
+        await navigator.clipboard?.writeText(text);
+        alert("Answer copied. You can now share it.");
+      }
+    };
 
-    menuBtn.addEventListener("click", function() {
-        sidebar.classList.add("open");
+    actionsBox.append(copy,speak,regenerate,share);
+    box.appendChild(actionsBox);
+  }
+
+  chat.appendChild(box);
+  scrollChat();
+}
+
+async function sendToAI(message){
+  if(!message && !selectedImage)return;
+
+  addMessage(message||"📷 Image","user");
+  lastUserMessage=message;
+
+  sendButton.disabled=true;
+  sendButton.textContent="…";
+
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),90000);
+
+    const response=await fetch(API_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        message:message||"",
+        image:selectedImage||null,
+        mimeType:selectedMimeType||null
+      }),
+      signal:controller.signal
     });
 
-    closeMenu.addEventListener("click", function() {
-        sidebar.classList.remove("open");
-    });
+    clearTimeout(timeout);
 
-    newChatMenu.addEventListener("click", function() {
-        chat.innerHTML = `
-            <div class="message ai">
-                Hello! I'm Omi AI. How can I help you today?
-            </div>
-        `;
-        messageInput.value = "";
-        sidebar.classList.remove("open");
-        messageInput.focus();
-    });    function saveRecentChat(message) {
-        let chats = JSON.parse(localStorage.getItem("omiRecentChats") || "[]");
+    const raw=await response.text();
 
-        chats.unshift({
-            text: message,
-            time: new Date().toLocaleString()
-        });
-
-        chats = chats.slice(0, 20);
-
-        localStorage.setItem("omiRecentChats", JSON.stringify(chats));
-
-        showRecentChats();
+    let data;
+    try{
+      data=JSON.parse(raw);
+    }catch(parseError){
+      console.error("Invalid server response:",raw);
+      throw new Error("Server returned an invalid response.");
     }
 
-    function showRecentChats() {
-        const chats = JSON.parse(localStorage.getItem("omiRecentChats") || "[]");
-        recentChats.innerHTML = "";
-
-        chats.forEach(function(item) {
-            const chatItem = document.createElement("button");
-            chatItem.textContent = item.text;
-            chatItem.className = "recent-chat-item";
-            chatItem.addEventListener("click", function() {
-                messageInput.value = item.text;
-                sidebar.classList.remove("open");
-                messageInput.focus();
-            });            
-recentChats.appendChild(chatItem);
-        });
+    if(!response.ok){
+      console.error("API Error:",response.status,data);
+      throw new Error(data.error||("Server error: "+response.status));
     }
 
-    showRecentChats();
+    if(data.reply){
+      lastAIMessage=data.reply;
+      addMessage(data.reply,"ai",true);
+      saveRecentChat(message);
 
-const imageInput = document.getElementById("imageInput");
-const imageBtn = document.getElementById("imageBtn");
+      // Voice output after displaying the answer
+      speakText(data.reply);
+    }else{
+      addMessage(
+        data.error||"Sorry, I couldn't get a response.",
+        "ai"
+      );
+    }
 
-imageBtn.addEventListener("click", function() {
-    imageInput.click();
+  }catch(error){
+    console.error("Chat Error:",error);
+
+    if(error.name==="AbortError"){
+      addMessage(
+        "⏱️ Omi AI took too long to respond. Please try again.",
+        "ai"
+      );
+    }else{
+      addMessage(
+        "⚠️ Omi AI could not respond right now. Please try again.",
+        "ai"
+      );
+    }
+
+  }finally{
+    sendButton.disabled=false;
+    sendButton.textContent="Send";
+
+    selectedImage=null;
+    selectedMimeType=null;
+    preview.innerHTML="";
+  }
+}
+
+async function sendMessage(){
+  const message=messageInput.value.trim();
+
+  if(!message && !selectedImage)return;
+
+  messageInput.value="";
+  await sendToAI(message);
+}
+
+function saveRecentChat(text){
+  if(!text)return;
+
+  let chats=JSON.parse(localStorage.getItem("omiRecentChats")||"[]");
+  chats.unshift({
+    text:text,
+    time:new Date().toLocaleString()
+  });
+  chats=chats.slice(0,20);
+
+  localStorage.setItem("omiRecentChats",JSON.stringify(chats));
+  showRecentChats();
+}
+
+function showRecentChats(filter=""){
+  recentChats.innerHTML="";
+
+  const chats=JSON.parse(localStorage.getItem("omiRecentChats")||"[]");
+  const query=filter.trim().toLowerCase();
+
+  const filtered=chats.filter(item=>{
+    return !query || item.text.toLowerCase().includes(query);
+  });
+
+  if(filtered.length===0){
+    const empty=document.createElement("div");
+    empty.className="search-empty";
+    empty.textContent=query ? "🔍 No matching chats" : "🕘 No recent chats";
+    recentChats.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(item=>{
+    const button=document.createElement("button");
+    button.className="side-btn recent-item";
+    button.textContent="💬 "+item.text;
+    button.onclick=()=>{
+      messageInput.value=item.text;
+      closeSidebar();
+      messageInput.focus();
+    };
+    recentChats.appendChild(button);
+  });
+}
+
+const recentSearch=document.getElementById("recentSearch");
+const clearSearch=document.getElementById("clearSearch");
+
+recentSearch.addEventListener("input",()=>{
+  showRecentChats(recentSearch.value);
 });
 
-imageInput.addEventListener("change", function() {
-    const file = imageInput.files[0];
+clearSearch.onclick=()=>{
+  recentSearch.value="";
+  showRecentChats();
+  recentSearch.focus();
+};
 
-    if (!file) {
-        return;
-    }
+function openSidebar(){
 
-    if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
+  sidebar.classList.add("open");
+  overlay.classList.add("show");
+}
 
-        reader.onload = function() {
-            window.selectedImage = reader.result.split(",")[1];
-            window.selectedMimeType = file.type;
-        };
+function closeSidebar(){
+  sidebar.classList.remove("open");
+  overlay.classList.remove("show");
+}
 
-        reader.readAsDataURL(file);
-    }
+document.getElementById("menuBtn").onclick=openSidebar;
+document.getElementById("closeMenu").onclick=closeSidebar;
+overlay.onclick=closeSidebar;
 
-    const url = URL.createObjectURL(file);
+document.getElementById("newChat").onclick=()=>{
+  chat.innerHTML='<div class="message ai">Hello! I\'m Omi AI. How can I help you today?</div>';
+  messageInput.value="";
+  selectedImage=null;
+  selectedMimeType=null;
+  preview.innerHTML="";
+  closeSidebar();
+};
 
-    if (file.type.startsWith("image/")) {
-        const img = document.createElement("img");
-        img.src = url;
-        img.style.maxWidth = "220px";
-        img.style.borderRadius = "12px";
-        img.style.margin = "8px 0";
-        chat.appendChild(img);
-    } else if (file.type.startsWith("video/")) {
-        const video = document.createElement("video");
-        video.src = url;
-        video.controls = true;
-        video.style.maxWidth = "260px";
-        video.style.borderRadius = "12px";
-        video.style.margin = "8px 0";
-        chat.appendChild(video);
-    }
+document.getElementById("themeBtn").onclick=()=>{
+  document.body.classList.toggle("dark");
+  localStorage.setItem("omiDark",document.body.classList.contains("dark"));
+};
 
-    chat.scrollTop = chat.scrollHeight;
-    imageInput.value = "";
+if(localStorage.getItem("omiDark")==="true"){
+  document.body.classList.add("dark");
+}
+
+document.getElementById("wallpaperBtn").onclick=()=>{
+  const input=document.createElement("input");
+  input.type="file";
+  input.accept="image/*";
+
+  input.onchange=()=>{
+    const file=input.files[0];
+    if(!file)return;
+
+    const reader=new FileReader();
+    reader.onload=()=>{
+      document.body.style.backgroundImage="url('"+reader.result+"')";
+      document.body.style.backgroundSize="cover";
+      document.body.style.backgroundAttachment="fixed";
+    };
+    reader.readAsDataURL(file);
+  };
+
+  input.click();
+};
+
+mediaBtn.onclick=()=>imageInput.click();
+
+imageInput.onchange=()=>{
+  const file=imageInput.files[0];
+  if(!file)return;
+
+  preview.innerHTML="";
+  const url=URL.createObjectURL(file);
+
+  if(file.type.startsWith("image/")){
+    const img=document.createElement("img");
+    img.src=url;
+    preview.appendChild(img);
+
+    const reader=new FileReader();
+    reader.onload=()=>{
+      selectedImage=reader.result.split(",")[1];
+      selectedMimeType=file.type;
+    };
+    reader.readAsDataURL(file);
+  }else if(file.type.startsWith("video/")){
+    const video=document.createElement("video");
+    video.src=url;
+    video.controls=true;
+    preview.appendChild(video);
+  }
+};
+
+sendButton.onclick=sendMessage;
+
+messageInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    sendMessage();
+  }
 });
 
-sendButton.addEventListener("click", sendMessage);
+function speakText(text){
+  if(!("speechSynthesis" in window))return;
 
-    messageInput.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-            sendMessage();
-        }
-    });
+  speechSynthesis.cancel();
+
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.onstart=()=>{
+    speaking=true;
+    const panel=document.getElementById("callPanel");
+    if(panel && panel.classList.contains("show")){
+      panel.classList.add("speaking");
+      document.getElementById("callStatus").textContent="Omi AI is speaking…";
+    }
+  };
+
+  utterance.onend=()=>{
+    speaking=false;
+    const panel=document.getElementById("callPanel");
+    if(panel){
+      panel.classList.remove("speaking");
+      if(panel.classList.contains("show")){
+        document.getElementById("callStatus").textContent="Tap the microphone to speak";
+      }
+    }
+  };
+
+  speechSynthesis.speak(utterance);
+}
+
+function stopSpeaking(){
+  if("speechSynthesis" in window){
+    speechSynthesis.cancel();
+  }
+  speaking=false;
+}
+
+function startVoiceInput(callback){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+    alert("Voice input is not supported by this browser.");
+    return;
+  }
+
+  recognition=new SpeechRecognition();
+  recognition.lang="en-US";
+  recognition.interimResults=false;
+  recognition.maxAlternatives=1;
+
+  recognition.onstart=()=>{
+    document.getElementById("micBtn").textContent="🔴";
+
+    const panel=document.getElementById("callPanel");
+    if(panel && panel.classList.contains("show")){
+      panel.classList.add("listening");
+      document.getElementById("callStatus").textContent="Listening…";
+    }
+  };
+
+  recognition.onresult=e=>{
+    const text=e.results[0][0].transcript;
+    callback(text);
+  };
+
+  recognition.onerror=e=>{
+    console.log("Voice error:",e.error);
+  };
+
+  recognition.onend=()=>{
+    document.getElementById("micBtn").textContent="🎙️";
+
+    const panel=document.getElementById("callPanel");
+    if(panel){
+      panel.classList.remove("listening");
+    }
+  };
+
+  recognition.start();
+}
+
+document.getElementById("micBtn").onclick=()=>{
+  startVoiceInput(text=>{
+    messageInput.value=text;
+    sendMessage();
+  });
+};
+
+let callMuted=false;
+
+function resetVoiceCallUI(){
+  const panel=document.getElementById("callPanel");
+  const status=document.getElementById("callStatus");
+  const mute=document.getElementById("callMute");
+
+  panel.classList.remove("listening","speaking");
+  status.textContent="Tap the microphone to speak";
+  mute.classList.remove("muted");
+  mute.innerHTML="🔇<span>Mute</span>";
+  callMuted=false;
+}
+
+function endVoiceCall(){
+  if(recognition){
+    try{ recognition.stop(); }catch(e){}
+  }
+
+  stopSpeaking();
+  resetVoiceCallUI();
+  document.getElementById("callPanel").classList.remove("show");
+}
+
+document.getElementById("callBtn").onclick=()=>{
+  closeSidebar();
+  resetVoiceCallUI();
+  document.getElementById("callPanel").classList.add("show");
+};
+
+document.getElementById("callClose").onclick=endVoiceCall;
+document.getElementById("endCall").onclick=endVoiceCall;
+
+document.getElementById("callMute").onclick=()=>{
+  const status=document.getElementById("callStatus");
+  const mute=document.getElementById("callMute");
+
+  callMuted=!callMuted;
+
+  if(callMuted){
+    if(recognition){
+      try{ recognition.stop(); }catch(e){}
+    }
+
+    mute.classList.add("muted");
+    mute.innerHTML="🔊<span>Unmute</span>";
+    status.textContent="Microphone muted";
+    document.getElementById("callPanel").classList.remove("listening");
+  }else{
+    mute.classList.remove("muted");
+    mute.innerHTML="🔇<span>Mute</span>";
+    status.textContent="Tap the microphone to speak";
+  }
+};
+
+document.getElementById("callMic").onclick=()=>{
+  const panel=document.getElementById("callPanel");
+  const status=document.getElementById("callStatus");
+
+  if(callMuted){
+    status.textContent="Microphone is muted";
+    return;
+  }
+
+  status.textContent="Listening…";
+  panel.classList.add("listening");
+
+  startVoiceInput(async text=>{
+    panel.classList.remove("listening");
+
+    if(callMuted){
+      status.textContent="Microphone is muted";
+      return;
+    }
+
+    status.textContent="You said: "+text;
+
+    try{
+      await sendToAI(text);
+      if(!callMuted){
+        status.textContent="Omi AI is responding…";
+      }
+    }catch(error){
+      status.textContent="Connection error";
+    }
+  });
+};
+
+showRecentChats();
 </script>
-
 </body>
 </html>
