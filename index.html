@@ -748,7 +748,7 @@ async function sendToAI(message){
         mimeType:selectedMimeType||null,
         history:(()=>{
           const items=Array.from(chat.querySelectorAll(".message"))
-            .slice(0,-1).slice(-20)
+            .slice(0,-1).slice(-10)
             .map(el=>({
               role:el.classList.contains("user")?"user":"model",
               parts:[{text:el.firstElementChild?.textContent||""}]

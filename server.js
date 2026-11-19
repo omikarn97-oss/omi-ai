@@ -75,7 +75,7 @@ if (image) {
 }
 
 const history = Array.isArray(req.body.history)
-    ? req.body.history.slice(-20).filter(m =>
+    ? req.body.history.slice(-10).filter(m =>
         (m.role === "user" || m.role === "model") &&
         Array.isArray(m.parts) &&
         m.parts.some(p => typeof p.text === "string")
