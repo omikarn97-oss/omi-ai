@@ -782,8 +782,7 @@ async function sendToAI(message){
       addMessage(data.reply,"ai",true);
       saveRecentChat(message);
 
-      // Voice output after displaying the answer
-      speakText(data.reply);
+      // Automatic voice output disabled.
     }else{
       addMessage(
         data.error||"Sorry, I couldn't get a response.",
