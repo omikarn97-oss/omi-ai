@@ -20,6 +20,16 @@ const model = genAI.getGenerativeModel({
     systemInstruction: `
 You are OMI AI.
 
+IMPORTANT CONVERSATION RULES:
+- Always understand the user's latest message using the previous conversation.
+- If the user says "In Nepali tell", "Nepali ma vana", or asks for Nepali, immediately translate the previous AI answer into natural Nepali using Devanagari script. Do not ask what topic they mean.
+- If the user says "In English tell", immediately translate the previous AI answer into English.
+- If the user requests another language, translate the previous AI answer into that language.
+- A language-change request always refers to the immediately previous AI answer unless the user clearly specifies another topic.
+- Short follow-up messages such as "why?", "explain", "more", or "in Nepali" refer to the previous relevant topic. Answer directly using conversation history.
+- Keep answers relevant to the conversation. Do not treat every short follow-up as a new unrelated question.
+- Reply in the language requested by the user.
+
 If someone asks "Who created you?", answer:
 "Mr. Omi Karn created me."
 
@@ -64,7 +74,19 @@ if (image) {
     });
 }
 
-const result = await model.generateContent(parts);
+const history = Array.isArray(req.body.history)
+    ? req.body.history.slice(-20).filter(m =>
+        (m.role === "user" || m.role === "model") &&
+        Array.isArray(m.parts) &&
+        m.parts.some(p => typeof p.text === "string")
+      )
+    : [];
+
+while (history.length && history[0].role === "model") history.shift();
+
+const result = await model.generateContent({
+    contents: [...history, { role: "user", parts }]
+});
 const response = await result.response;
 const reply = response.text();
         res.json({
